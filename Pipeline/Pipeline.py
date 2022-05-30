@@ -24,8 +24,8 @@ ADD_BOX_ERROR = False
 # Toggle these to use built from scratch algorithem or Scikit-learn algorithems
 USE_OUR_ICA = False
 USE_OUR_FFT = True
-REMOVE_OUTLIERS = False 
-
+REMOVE_OUTLIERS = True 
+DETREND = False
 
 # show_plots = True
 show_plots = False
@@ -42,8 +42,9 @@ WRITE_HR_txt = True
 
 
 CASCADE_PATH = "haarcascade_frontalface_default.xml"
-VIDEO_DIR = "D:/Uni/GP/Dataset/harun/harun_resting/"
-# VIDEO_DIR = "D:/Uni/GP/Dataset/cpi/cpi_resting/"
+# VIDEO_DIR = "D:/Uni/GP/Dataset/harun/harun_resting/"
+
+VIDEO_DIR = "D:/Uni/GP/Dataset/id1/alex/alex_resting/"
 # VIDEO_DIR = "../../video/"
 RESULTS_SAVE_DIR = "../Results/"
 
@@ -76,7 +77,7 @@ def plotSignals(signals, label):
     plt.tick_params(axis='y', labelsize=17)
     plt.show()
 
-def plotSpectrum(freqs, power_spectrum):
+def plotSpectrum(freqs, power_spectrum,hr_count):
     idx = np.argsort(freqs)
     fig = plt.figure()
     fig.patch.set_facecolor('white')
@@ -87,7 +88,8 @@ def plotSpectrum(freqs, power_spectrum):
     plt.tick_params(axis='x', labelsize=17)
     plt.tick_params(axis='y', labelsize=17)
     plt.xlim([0.75, 4])
-    plt.show()
+    plt.savefig('./figs/'+str(hr_count)+'.png')
+    # plt.show()
 
 
 #----------------------------------------------------------------------------------------------------------------------------
@@ -116,7 +118,7 @@ previous_bounding_box = None
 NUMBER_OF_SECONDS_TO_WAIT = 15 # waits for heartrate to converge
 away_count = 0
 outlier_count = 0
-
+hr_count = 0
 while True:
     # Capture frame-by-frame
     ret, frame = video.read()
@@ -141,10 +143,22 @@ while True:
         if len(heart_rates) > 0:
             lastHR = heart_rates[-1] 
 
+        # detrending
+        if DETREND:
+            # print(window.shape)
+            # print("shape before: ",np.asarray(window).shape)
+            a0 = signal.detrend(np.asarray(window)[:,0])
+            a1 = signal.detrend(np.asarray(window)[:,1])
+            a2 = signal.detrend(np.asarray(window)[:,2])
+            window = np.vstack([a0,a1,a2]).T
+            # print("shape after: ",np.asarray(window).shape)
+            window = signal.detrend(window,axis=0)
+
         # Normalize across the window to have zero-mean and unit variance
         mean = np.mean(window, axis=0)
         std = np.std(window, axis=0)
         normalized = (window - mean) / std
+
 
         # Separate into three source signals using ICA
         source_signal = None
@@ -156,11 +170,12 @@ while True:
 
         hr,  source_signal, freqs, power_spectrum, outlier_count = get_heart_rate(source_signal, lastHR,NUMBER_OF_SECONDS_TO_WAIT,USE_OUR_FFT,REMOVE_OUTLIERS,WINDOW_SIZE,FPS,MIN_HR_BPM,SEC_PER_MIN,MAX_HR_BMP,MAX_HR_CHANGE,outlier_count)
         heart_rates.append(hr)
+        hr_count +=1
         
         if show_plots:
             # plotSignals(normalized, "Normalized color intensity")
             # plotSignals(source_signal, "Source signal strength")
-            plotSpectrum(freqs, power_spectrum)
+            plotSpectrum(freqs, power_spectrum,hr_count)
 
         NUMBER_OF_SECONDS_TO_WAIT -= 1
 
@@ -200,7 +215,6 @@ if(WRITE_HR_txt):
     file.close()
     
     a_file = open(filename, "a")
-    a_file.write("Heart_Rates\n")
     for hr in heart_rates:
         a_file.write(str(hr)+"\n")
     a_file.close()
@@ -215,7 +229,6 @@ file = open(filename,"w")
 file.close()
 
 a_file = open(filename, "a")
-a_file.write("Outlier_Count\n")
 a_file.write(str(outlier_count))
 
     
