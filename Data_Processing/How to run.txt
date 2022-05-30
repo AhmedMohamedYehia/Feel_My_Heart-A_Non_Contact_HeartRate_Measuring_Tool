@@ -1,0 +1,4 @@
+python Data_Read_Manuplation.py "window size" "file name".xml
+
+ex:
+python Data_Read_Manuplation.py 180 cms50_stream_handler.xml

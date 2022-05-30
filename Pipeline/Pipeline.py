@@ -13,6 +13,9 @@ from Jade_Algo import *
 from ROI import *
 
 
+# Toggle between recorded video and to open webcam
+OPEN_WEBCAM = False
+
 # Toggle these for different ROIs
 REMOVE_EYES = True
 FOREHEAD_ONLY = False
@@ -20,36 +23,39 @@ ADD_BOX_ERROR = False
 
 # Toggle these to use built from scratch algorithem or Scikit-learn algorithems
 USE_OUR_ICA = False
-USE_OUR_FFT = False
-REMOVE_OUTLIERS = False
+USE_OUR_FFT = True
+REMOVE_OUTLIERS = False 
 
-# Toggle between recorded video and to open webcam
-OPEN_WEBCAM = True
+
+# show_plots = True
+show_plots = False
 
 # Change Recorded video dir.
+
 DEFAULT_VIDEO = "cv_camera_sensor_stream_handler.avi"
 # DEFAULT_VIDEO = "IMG_5356.mp4"
 # DEFAULT_VIDEO = "android-1.mp4"
 
 
+# Whether to output text file or np file
+WRITE_HR_txt = True
+
 
 CASCADE_PATH = "haarcascade_frontalface_default.xml"
-VIDEO_DIR = "../video/"
-RESULTS_SAVE_DIR = "../results/"
-if REMOVE_EYES:
-    RESULTS_SAVE_DIR += "no_eyes/"
-if FOREHEAD_ONLY:
-    RESULTS_SAVE_DIR += "forehead/"
+VIDEO_DIR = "D:/Uni/GP/Dataset/harun/harun_resting/"
+# VIDEO_DIR = "D:/Uni/GP/Dataset/cpi/cpi_resting/"
+# VIDEO_DIR = "../../video/"
+RESULTS_SAVE_DIR = "../Results/"
 
 MIN_FACE_SIZE = 100
 
 WIDTH_FRACTION = 0.6 # Fraction of bounding box width to include in ROI
 HEIGHT_FRACTION = 1
 
-FPS = 30
+FPS = 25
 WINDOW_TIME_SEC = 6 
 WINDOW_SIZE = int(np.ceil(WINDOW_TIME_SEC * FPS))
-MIN_HR_BPM = 45.0
+MIN_HR_BPM = 60.0
 MAX_HR_BMP = 180.0
 MAX_HR_CHANGE = 12.0 
 SEC_PER_MIN = 60
@@ -57,69 +63,32 @@ SEC_PER_MIN = 60
 EYE_LOWER_FRAC = 0.25
 EYE_UPPER_FRAC = 0.5
 
-# def plotSignals(signals, label):
-#     seconds = np.arange(0, WINDOW_TIME_SEC, 1.0 / FPS)
-#     colors = ["r", "g", "b"]
-#     fig = plt.figure()
-#     fig.patch.set_facecolor('white')
-#     for i in range(3):
-#         plt.plot(seconds, signals[:,i], colors[i])
-#     plt.xlabel('Time (sec)', fontsize=17)
-#     plt.ylabel(label, fontsize=17)
-#     plt.tick_params(axis='x', labelsize=17)
-#     plt.tick_params(axis='y', labelsize=17)
-#     plt.show()
+def plotSignals(signals, label):
+    seconds = np.arange(0, WINDOW_TIME_SEC, 1.0 / FPS)
+    colors = ["r", "g", "b"]
+    fig = plt.figure()
+    fig.patch.set_facecolor('white')
+    for i in range(3):
+        plt.plot(seconds, signals[:,i], colors[i])
+    plt.xlabel('Time (sec)', fontsize=17)
+    plt.ylabel(label, fontsize=17)
+    plt.tick_params(axis='x', labelsize=17)
+    plt.tick_params(axis='y', labelsize=17)
+    plt.show()
 
-# def plotSpectrum(freqs, power_spectrum):
-#     idx = np.argsort(freqs)
-#     fig = plt.figure()
-#     fig.patch.set_facecolor('white')
-#     for i in range(3):
-#         plt.plot(freqs[idx], power_spectrum[idx,i])
-#     plt.xlabel("Frequency (Hz)", fontsize=17)
-#     plt.ylabel("Power", fontsize=17)
-#     plt.tick_params(axis='x', labelsize=17)
-#     plt.tick_params(axis='y', labelsize=17)
-#     plt.xlim([0.75, 4])
-#     plt.show()
+def plotSpectrum(freqs, power_spectrum):
+    idx = np.argsort(freqs)
+    fig = plt.figure()
+    fig.patch.set_facecolor('white')
+    for i in range(3):
+        plt.plot(freqs[idx], power_spectrum[idx,i])
+    plt.xlabel("Frequency (Hz)", fontsize=17)
+    plt.ylabel("Power", fontsize=17)
+    plt.tick_params(axis='x', labelsize=17)
+    plt.tick_params(axis='y', labelsize=17)
+    plt.xlim([0.75, 4])
+    plt.show()
 
-def get_heart_rate(source_signal, lastHR,NUMBER_OF_SECONDS_TO_WAIT,show_plots = False):
-    global outlier_count
-    # Find power spectrum
-    power_spectrum = None
-    if USE_OUR_FFT:
-        s0 = apply_fft(source_signal[:, 0])
-        s1 = apply_fft(source_signal[:, 1])
-        s2 = apply_fft(source_signal[:, 2])
-
-        power_spectrum = np.abs(np.vstack([s0,s1,s2]))**2
-    else:
-        power_spectrum = np.abs(np.fft.fft(source_signal, axis=0))**2
-    freqs = np.fft.fftfreq(WINDOW_SIZE, 1.0 / FPS)
-
-    # Find heart rate
-    maxPwrSrc = np.max(power_spectrum, axis=1)
-    validIdx = np.where((freqs >= MIN_HR_BPM / SEC_PER_MIN) & (freqs <= MAX_HR_BMP / SEC_PER_MIN))
-    validPwr = maxPwrSrc[validIdx]
-    validFreqs = freqs[validIdx]
-    maxPwrIdx = np.argmax(validPwr)
-    hr = validFreqs[maxPwrIdx]*60
-    if REMOVE_OUTLIERS:
-        if (lastHR is not None) and (abs(lastHR-hr) > MAX_HR_CHANGE):
-            outlier_count += 1
-            hr = lastHR
-            # if hr > lastHR:
-            #     hr = lastHR + MAX_HR_CHANGE
-            # else:
-            #     hr = lastHR - MAX_HR_CHANGE
-
-    if( NUMBER_OF_SECONDS_TO_WAIT == 0):
-        print("------------------------------------------------------------------------")
-        print("start of real reading:")
-        print("-----------------------")
-    print(hr)
-
-    return hr, normalized, source_signal, freqs, power_spectrum
 
 #----------------------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------------
@@ -185,13 +154,13 @@ while True:
             ica = FastICA()
             source_signal = ica.fit_transform(normalized)
 
-        hr, normalized, source_signal, freqs, power_spectrum = get_heart_rate(source_signal, lastHR, NUMBER_OF_SECONDS_TO_WAIT)
+        hr,  source_signal, freqs, power_spectrum, outlier_count = get_heart_rate(source_signal, lastHR,NUMBER_OF_SECONDS_TO_WAIT,USE_OUR_FFT,REMOVE_OUTLIERS,WINDOW_SIZE,FPS,MIN_HR_BPM,SEC_PER_MIN,MAX_HR_BMP,MAX_HR_CHANGE,outlier_count)
         heart_rates.append(hr)
         
-        # if show_plots:
-        #     plotSignals(normalized, "Normalized color intensity")
-        #     plotSignals(source_signal, "Source signal strength")
-        #     plotSpectrum(freqs, power_spectrum)
+        if show_plots:
+            # plotSignals(normalized, "Normalized color intensity")
+            # plotSignals(source_signal, "Source signal strength")
+            plotSpectrum(freqs, power_spectrum)
 
         NUMBER_OF_SECONDS_TO_WAIT -= 1
 
@@ -222,17 +191,37 @@ while True:
     if k==27 or k==-1: # escape press
         break
 
-# to load video from dir. not from webcam
-if not OPEN_WEBCAM:
-    print (videoFile)
-    filename = RESULTS_SAVE_DIR + videoFile[0:-4]
-    if ADD_BOX_ERROR:
-        filename += "_" + str(BOX_ERROR_MAX)
+
+# Save heartrate values to a text file
+print (videoFile)
+filename = RESULTS_SAVE_DIR + "HR_Results.csv"
+if(WRITE_HR_txt):
+    file = open(filename,"w")
+    file.close()
+    
+    a_file = open(filename, "a")
+    a_file.write("Heart_Rates\n")
+    for hr in heart_rates:
+        a_file.write(str(hr)+"\n")
+    a_file.close()
+else:
     np.save(filename, heart_rates)
 
+
+
+filename = RESULTS_SAVE_DIR + "Outlier_Count.csv"
+
+file = open(filename,"w")
+file.close()
+
+a_file = open(filename, "a")
+a_file.write("Outlier_Count\n")
+a_file.write(str(outlier_count))
+
     
+
 print (heart_rates)
-# print("Number of outliers: ",outlier_count)
+print("Number of outliers: ",outlier_count)
 
 video.release()
 cv2.destroyAllWindows()
