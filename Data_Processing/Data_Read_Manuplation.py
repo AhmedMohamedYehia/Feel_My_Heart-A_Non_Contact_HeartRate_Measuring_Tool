@@ -29,24 +29,37 @@ def read_from_xml_file(file_path):
             sum_72 = 0
     return hr,hr_72
 
-def read_from_xml_file_x_sliding_y(file_path,window_size =180, window_slide = 30):
+def read_from_xml_file_x_sliding_y(file_path,window_size =150, window_slide = 25):
     tree = ET.parse(file_path)
     root = tree.getroot()
     size = len(root)
     hr = []
     hr_180 = []
-    sum_432 = 0
-    count = 0
     for i in range(size):
         hr.append(int(root[i][1].text))
         
-    for i in range(0,int(size-(window_size*2.4)),int(window_slide*2.4)):
+    for i in range(0,int(size-(window_size*2.4)+1),int(window_slide*2.4)):
         hr_180.append(int(sum(hr[i:int(i+(window_size*2.4))])/(window_size*2.4)))
     return hr_180
 
 
+def read_from_xml_file_60(file_path,window_size =150):
+    tree = ET.parse(file_path)
+    root = tree.getroot()
+    size = len(root)
+    hr = []
+    hr_180 = []
+    for i in range(size):
+        hr.append(int(root[i][1].text))
+    print(size)
+    for i in range(0,int(size-360+1),60):
+        print("i: ",i,", i+: ",i+360 )
+        hr_180.append(int(sum(hr[i:i+360])/(360)))
+    print(len(hr_180))
+    return hr_180
 
-heart_rates = read_from_xml_file_x_sliding_y(input_file_name,window_size=int(window_size),window_slide=int(window_slide))
+# heart_rates = read_from_xml_file_x_sliding_y(input_file_name,window_size=int(window_size),window_slide=int(window_slide))
+heart_rates = read_from_xml_file_60(input_file_name,window_size=int(window_size))
 
 
 filename =  "./HR_Ground_Truth/HR_Ground_Truth.csv"
@@ -55,7 +68,7 @@ file.close()
 
 
 a_file = open(filename, "a")
-a_file.write("Heart_Rates\n")
+# a_file.write("Heart_Rates\n")
 for hr in heart_rates:
     a_file.write(str(hr)+"\n")
 a_file.close()

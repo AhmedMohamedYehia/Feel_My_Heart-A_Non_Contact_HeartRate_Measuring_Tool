@@ -15,7 +15,8 @@ face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
 # To capture video from webcam. 
 # cap = cv2.VideoCapture(0)
-cap = cv2.VideoCapture(r'D:\Uni\GP\Dataset\id1\alex\alex_resting\cv_camera_sensor_stream_handler.avi')
+cap = cv2.VideoCapture(r'D:/Uni/GP/Dataset/cpi/cpi_gym/cv_camera_sensor_stream_handler.avi')
+# cap = cv2.VideoCapture(r'D:\Uni\GP\Dataset\id1\alex\alex_resting\cv_camera_sensor_stream_handler.avi')
 
 
 

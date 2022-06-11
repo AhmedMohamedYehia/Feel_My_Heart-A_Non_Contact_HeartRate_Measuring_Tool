@@ -19,9 +19,8 @@ OPEN_WEBCAM = False
 # Toggle these for different ROIs
 REMOVE_EYES = True
 FOREHEAD_ONLY = False
-ADD_BOX_ERROR = False
 
-# Toggle these to use built from scratch algorithem or Scikit-learn algorithems
+# Toggle txhese to use built from scratch algorithem or Scikit-learn algorithems
 USE_OUR_ICA = False
 USE_OUR_FFT = True
 REMOVE_OUTLIERS = True 
@@ -45,6 +44,7 @@ CASCADE_PATH = "haarcascade_frontalface_default.xml"
 # VIDEO_DIR = "D:/Uni/GP/Dataset/harun/harun_resting/"
 
 VIDEO_DIR = "D:/Uni/GP/Dataset/id1/alex/alex_resting/"
+# VIDEO_DIR = "D:/Uni/GP/Dataset/cpi/cpi_gym/"
 # VIDEO_DIR = "../../video/"
 RESULTS_SAVE_DIR = "../Results/"
 
@@ -75,7 +75,21 @@ def plotSignals(signals, label):
     plt.ylabel(label, fontsize=17)
     plt.tick_params(axis='x', labelsize=17)
     plt.tick_params(axis='y', labelsize=17)
-    plt.show()
+    plt.savefig('./figs/signal/'+str(hr_count)+'.png')
+    # plt.show()
+def plotSignals_norm(signals, label):
+    seconds = np.arange(0, WINDOW_TIME_SEC, 1.0 / FPS)
+    colors = ["r", "g", "b"]
+    fig = plt.figure()
+    fig.patch.set_facecolor('white')
+    for i in range(3):
+        plt.plot(seconds, signals[:,i], colors[i])
+    plt.xlabel('Time (sec)', fontsize=17)
+    plt.ylabel(label, fontsize=17)
+    plt.tick_params(axis='x', labelsize=17)
+    plt.tick_params(axis='y', labelsize=17)
+    plt.savefig('./figs/signalNorm/'+str(hr_count)+'.png')
+    # plt.show()
 
 def plotSpectrum(freqs, power_spectrum,hr_count):
     idx = np.argsort(freqs)
@@ -88,7 +102,7 @@ def plotSpectrum(freqs, power_spectrum,hr_count):
     plt.tick_params(axis='x', labelsize=17)
     plt.tick_params(axis='y', labelsize=17)
     plt.xlim([0.75, 4])
-    plt.savefig('./figs/'+str(hr_count)+'.png')
+    plt.savefig('./figs/powerSpectrum/'+str(hr_count)+'.png')
     # plt.show()
 
 
@@ -173,8 +187,8 @@ while True:
         hr_count +=1
         
         if show_plots:
-            # plotSignals(normalized, "Normalized color intensity")
-            # plotSignals(source_signal, "Source signal strength")
+            plotSignals_norm(normalized, "Normalized color intensity")
+            plotSignals(source_signal, "Source signal strength")
             plotSpectrum(freqs, power_spectrum,hr_count)
 
         NUMBER_OF_SECONDS_TO_WAIT -= 1
