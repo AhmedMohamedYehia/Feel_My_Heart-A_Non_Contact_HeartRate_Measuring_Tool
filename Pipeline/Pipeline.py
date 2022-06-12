@@ -4,14 +4,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
 from sklearn.decomposition import FastICA
-import warnings
-import random
-import math
 
 from Fourier_Transform import *
 from Jade_Algo import *
 from ROI import *
-
+from Live_Plots import *
 
 # Toggle between recorded video and to open webcam
 OPEN_WEBCAM = False
@@ -26,14 +23,12 @@ USE_OUR_FFT = True
 REMOVE_OUTLIERS = True 
 DETREND = False
 
-# show_plots = True
-show_plots = False
+show_plots = True
+# show_plots = False
 
 # Change Recorded video dir.
 
 DEFAULT_VIDEO = "cv_camera_sensor_stream_handler.avi"
-# DEFAULT_VIDEO = "IMG_5356.mp4"
-# DEFAULT_VIDEO = "android-1.mp4"
 
 
 # Whether to output text file or np file
@@ -41,9 +36,9 @@ WRITE_HR_txt = True
 
 
 CASCADE_PATH = "haarcascade_frontalface_default.xml"
-# VIDEO_DIR = "D:/Uni/GP/Dataset/harun/harun_resting/"
+VIDEO_DIR = "D:/Uni/GP/Dataset/harun/harun_resting/"
 
-VIDEO_DIR = "D:/Uni/GP/Dataset/id1/alex/alex_resting/"
+# VIDEO_DIR = "D:/Uni/GP/Dataset/id1/alex/alex_resting/"
 # VIDEO_DIR = "D:/Uni/GP/Dataset/cpi/cpi_gym/"
 # VIDEO_DIR = "../../video/"
 RESULTS_SAVE_DIR = "../Results/"
@@ -63,47 +58,6 @@ SEC_PER_MIN = 60
 
 EYE_LOWER_FRAC = 0.25
 EYE_UPPER_FRAC = 0.5
-
-def plotSignals(signals, label):
-    seconds = np.arange(0, WINDOW_TIME_SEC, 1.0 / FPS)
-    colors = ["r", "g", "b"]
-    fig = plt.figure()
-    fig.patch.set_facecolor('white')
-    for i in range(3):
-        plt.plot(seconds, signals[:,i], colors[i])
-    plt.xlabel('Time (sec)', fontsize=17)
-    plt.ylabel(label, fontsize=17)
-    plt.tick_params(axis='x', labelsize=17)
-    plt.tick_params(axis='y', labelsize=17)
-    plt.savefig('./figs/signal/'+str(hr_count)+'.png')
-    # plt.show()
-def plotSignals_norm(signals, label):
-    seconds = np.arange(0, WINDOW_TIME_SEC, 1.0 / FPS)
-    colors = ["r", "g", "b"]
-    fig = plt.figure()
-    fig.patch.set_facecolor('white')
-    for i in range(3):
-        plt.plot(seconds, signals[:,i], colors[i])
-    plt.xlabel('Time (sec)', fontsize=17)
-    plt.ylabel(label, fontsize=17)
-    plt.tick_params(axis='x', labelsize=17)
-    plt.tick_params(axis='y', labelsize=17)
-    plt.savefig('./figs/signalNorm/'+str(hr_count)+'.png')
-    # plt.show()
-
-def plotSpectrum(freqs, power_spectrum,hr_count):
-    idx = np.argsort(freqs)
-    fig = plt.figure()
-    fig.patch.set_facecolor('white')
-    for i in range(3):
-        plt.plot(freqs[idx], power_spectrum[idx,i])
-    plt.xlabel("Frequency (Hz)", fontsize=17)
-    plt.ylabel("Power", fontsize=17)
-    plt.tick_params(axis='x', labelsize=17)
-    plt.tick_params(axis='y', labelsize=17)
-    plt.xlim([0.75, 4])
-    plt.savefig('./figs/powerSpectrum/'+str(hr_count)+'.png')
-    # plt.show()
 
 
 #----------------------------------------------------------------------------------------------------------------------------
@@ -187,8 +141,8 @@ while True:
         hr_count +=1
         
         if show_plots:
-            plotSignals_norm(normalized, "Normalized color intensity")
-            plotSignals(source_signal, "Source signal strength")
+            plotSignals_norm(normalized, "Normalized color intensity",WINDOW_TIME_SEC,FPS,hr_count)
+            plotSignals(source_signal, "Source signal strength",WINDOW_TIME_SEC,FPS,hr_count)
             plotSpectrum(freqs, power_spectrum,hr_count)
 
         NUMBER_OF_SECONDS_TO_WAIT -= 1
