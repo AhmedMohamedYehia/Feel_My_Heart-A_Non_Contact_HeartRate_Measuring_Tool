@@ -11,7 +11,7 @@ from ROI import *
 from Live_Plots import *
 
 # Toggle between recorded video and to open webcam
-OPEN_WEBCAM = False
+OPEN_WEBCAM = True
 
 # Toggle these for different ROIs
 REMOVE_EYES = True
@@ -36,10 +36,10 @@ WRITE_HR_txt = True
 
 
 CASCADE_PATH = "haarcascade_frontalface_default.xml"
-VIDEO_DIR = "D:/Uni/GP/Dataset/harun/harun_resting/"
+# VIDEO_DIR = "D:/Uni/GP/Dataset/harun/harun_resting/"
 
 # VIDEO_DIR = "D:/Uni/GP/Dataset/id1/alex/alex_resting/"
-# VIDEO_DIR = "D:/Uni/GP/Dataset/cpi/cpi_gym/"
+VIDEO_DIR = "D:/Uni/GP/Dataset/cpi/cpi_gym/"
 # VIDEO_DIR = "../../video/"
 RESULTS_SAVE_DIR = "../Results/"
 
@@ -155,13 +155,13 @@ while True:
     if roi is not None:
         if(len(heart_rates) > 0):
             cv2.putText(roi, str(int(heart_rates[-1])), ((previous_bounding_box[0]+(previous_bounding_box[2]//4)), previous_bounding_box[1]), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
-        cv2.imshow('ROI', roi)
+        cv2.imshow('Feel My Heart', roi)
         away_count = 0 
     # if not only show the face without heartrate
     else:
         frame = np.full(frame.shape, False, dtype=np.uint8)
         cv2.putText(frame, "Please recenter your face ", (90, 30), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
-        cv2.imshow('ROI',frame )
+        cv2.imshow('Feel My Heart',frame )
         away_count +=1
 
     # recalibrate if no face detected for 3 seconds then empty the sliding window and start calc. all over

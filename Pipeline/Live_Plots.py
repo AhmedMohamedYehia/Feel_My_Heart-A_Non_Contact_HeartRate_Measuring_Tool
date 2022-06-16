@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 def plotSignals(signals, label,WINDOW_TIME_SEC,FPS,hr_count):
     seconds = np.arange(0, WINDOW_TIME_SEC, 1.0 / FPS)
     colors = ["r", "g", "b"]
-    fig = plt.figure()
+    fig = plt.figure(figsize=(16, 4))
     fig.patch.set_facecolor('white')
     for i in range(3):
         plt.plot(signals[:,i], colors[i])
-    plt.xlabel('Time (sec)', fontsize=17)
+    plt.xlabel('Frame Index', fontsize=17)
     plt.ylabel(label, fontsize=17)
     plt.tick_params(axis='x', labelsize=17)
     plt.tick_params(axis='y', labelsize=17)
@@ -18,11 +18,11 @@ def plotSignals(signals, label,WINDOW_TIME_SEC,FPS,hr_count):
 def plotSignals_norm(signals, label,WINDOW_TIME_SEC,FPS,hr_count):
     seconds = np.arange(0, WINDOW_TIME_SEC, 1.0 / FPS)
     colors = ["r", "g", "b"]
-    fig = plt.figure()
+    fig = plt.figure(figsize=(16, 4))
     fig.patch.set_facecolor('white')
     for i in range(3):
         plt.plot(signals[:,i], colors[i])
-    plt.xlabel('Time (sec)', fontsize=17)
+    plt.xlabel('Frame Index', fontsize=17)
     plt.ylabel(label, fontsize=17)
     plt.tick_params(axis='x', labelsize=17)
     plt.tick_params(axis='y', labelsize=17)
