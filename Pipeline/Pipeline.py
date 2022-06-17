@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from scipy import signal
 from sklearn.decomposition import FastICA
 
+import ctypes
 from Fourier_Transform import *
 from Jade_Algo import *
 from ROI import *
@@ -12,6 +13,8 @@ from Live_Plots import *
 
 # Toggle between recorded video and to open webcam
 OPEN_WEBCAM = True
+SHOW_WHOLE_IMAGE = True
+FULL_WINDOW = False
 
 # Toggle these for different ROIs
 REMOVE_EYES = True
@@ -87,6 +90,29 @@ NUMBER_OF_SECONDS_TO_WAIT = 15 # waits for heartrate to converge
 away_count = 0
 outlier_count = 0
 hr_count = 0
+
+# Get the window size and calculate the center
+user32 = ctypes.windll.user32
+win_x, win_y = [user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)] 
+win_cnt_x, win_cnt_y = [user32.GetSystemMetrics(0)/2, user32.GetSystemMetrics(1)/2] 
+
+while True:
+
+    ret, frame = video.read()
+    frame = np.full(frame.shape, False, dtype=np.uint8)
+    cv2.putText(frame, "Welcome", (260, 200), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
+    cv2.putText(frame, "Press Space to start", (150, 260), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
+    cv2.putText(frame, "measuring your heart rate.", (110, 290), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
+
+    if FULL_WINDOW:
+        frame = cv2.resize(frame,(win_x, win_y))
+    
+    cv2.imshow('Feel My Heart',frame )
+    k = cv2.waitKey(30) & 0xff
+
+    if k==32 or k==-1: # space press
+        break
+
 while True:
     # Capture frame-by-frame
     ret, frame = video.read()
@@ -153,19 +179,33 @@ while True:
 
     # if there and ROI and a heartrate show a bounding bx arounf face with the measured heartrate
     if roi is not None:
-        if(len(heart_rates) > 0):
-            cv2.putText(roi, str(int(heart_rates[-1])), ((previous_bounding_box[0]+(previous_bounding_box[2]//4)), previous_bounding_box[1]), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
-        cv2.imshow('Feel My Heart', roi)
-        away_count = 0 
+        if SHOW_WHOLE_IMAGE:
+            if(len(heart_rates) > 0):
+                cv2.putText(frame, str(int(heart_rates[-1])), ((previous_bounding_box[0]+(previous_bounding_box[2]//4)), previous_bounding_box[1]), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
+            if FULL_WINDOW:
+                roi = cv2.resize(roi,(win_x, win_y))
+            cv2.imshow('Feel My Heart', frame)
+            away_count = 0 
+        else:
+            if(len(heart_rates) > 0):
+                cv2.putText(roi, str(int(heart_rates[-1])), ((previous_bounding_box[0]+(previous_bounding_box[2]//4)), previous_bounding_box[1]), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2) 
+            if FULL_WINDOW:
+                roi = cv2.resize(roi,(win_x, win_y))
+            cv2.imshow('Feel My Heart', roi)
+            away_count = 0 
     # if not only show the face without heartrate
     else:
         frame = np.full(frame.shape, False, dtype=np.uint8)
+        # print("frame: ",frame.shape)
         cv2.putText(frame, "Please recenter your face ", (90, 30), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
+        
+        # frame = cv2.resize(frame,(win_x, win_y))
         cv2.imshow('Feel My Heart',frame )
         away_count +=1
 
     # recalibrate if no face detected for 3 seconds then empty the sliding window and start calc. all over
     k = cv2.waitKey(30) & 0xff
+    # print(k)
     if k==32 or away_count==(FPS*3): # space press
         print("Recalibrating !")
         rgb_signal = []
@@ -202,7 +242,7 @@ a_file.write(str(outlier_count))
     
 
 print (heart_rates)
-print("Number of outliers: ",outlier_count)
+# print("Number of outliers: ",outlier_count)
 
 video.release()
 cv2.destroyAllWindows()
