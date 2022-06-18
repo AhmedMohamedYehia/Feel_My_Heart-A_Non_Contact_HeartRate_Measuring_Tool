@@ -100,7 +100,7 @@ while True:
     ret, frame = video.read()
     frame = np.full(frame.shape, False, dtype=np.uint8)
     cv2.putText(frame, "Welcome", (260, 200), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
-    cv2.putText(frame, "Press Space to start", (150, 260), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
+    cv2.putText(frame, "Press Enter to start", (150, 260), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
     cv2.putText(frame, "measuring your heart rate.", (110, 290), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
 
     if FULL_WINDOW:
@@ -108,8 +108,8 @@ while True:
     
     cv2.imshow('Feel My Heart',frame )
     k = cv2.waitKey(30) & 0xff
-
-    if k==32 or k==-1: # space press
+    # print(k)
+    if k==13 or k==-1: # enter press
         break
     
     if k==27 or k==-1: # escape press
