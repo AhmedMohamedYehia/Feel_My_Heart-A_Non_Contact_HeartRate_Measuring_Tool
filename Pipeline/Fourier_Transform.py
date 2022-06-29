@@ -9,19 +9,18 @@ def padding(x):
 
 
 
-def FFT(x):
-    N = len(x)
+def FFT(signal):
+    N = len(signal)
     if N == 1:
-        return x
+        return signal
     else:
-        X_even = FFT(x[::2])
-        X_odd = FFT(x[1::2])
-        factor = \
-          np.exp(-2j*np.pi*np.arange(N)/ N)
-        
-        X = np.concatenate(\
-            [X_even+factor[:int(N/2)]*X_odd,
-             X_even+factor[int(N/2):]*X_odd])
+        even_part = FFT(signal[::2])
+        odd_part = FFT(signal[1::2])
+        arr =  np.arange(N) / N
+        factor = np.exp(-2j * np.pi * arr)
+        X_leftpart = ( (factor[:N//2] * odd_part) + even_part )
+        X_rightpart = ( (factor[N//2:] * odd_part) + even_part)
+        X = np.concatenate([ X_leftpart , X_rightpart ])
         return X
 
 def apply_fft(signal):

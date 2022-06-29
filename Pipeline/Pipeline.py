@@ -10,11 +10,13 @@ from Fourier_Transform import *
 from Jade_Algo import *
 from ROI import *
 from Live_Plots import *
-
+from FaceDetection import CascadeClassifier, ViolaAndJones,WeakClassifier,HaarFeature,Rectangle
+from FaceTracking import getHarrisCorners , featuresTranslation , applyGeometricTransformation
+ff = 0 
 # Toggle between recorded video and to open webcam
 OPEN_WEBCAM = True
 SHOW_WHOLE_IMAGE = True
-FULL_WINDOW = False
+FULL_WINDOW = True
 
 # Toggle these for different ROIs
 REMOVE_EYES = True
@@ -23,6 +25,8 @@ FOREHEAD_ONLY = False
 # Toggle txhese to use built from scratch algorithem or Scikit-learn algorithems
 USE_OUR_ICA = False
 USE_OUR_FFT = True
+USE_OUR_FACE_DETECTION = True
+
 REMOVE_OUTLIERS = True 
 DETREND = False
 
@@ -54,8 +58,12 @@ HEIGHT_FRACTION = 1
 FPS = 25
 WINDOW_TIME_SEC = 6 
 WINDOW_SIZE = int(np.ceil(WINDOW_TIME_SEC * FPS))
+
 MIN_HR_BPM = 60.0
-MAX_HR_BMP = 180.0
+MAX_HR_BMP = 150.0
+if ff:
+    MIN_HR_BPM = 120.0
+    MAX_HR_BMP = 160.0
 MAX_HR_CHANGE = 12.0 
 SEC_PER_MIN = 60
 
@@ -118,7 +126,8 @@ mode = None
 while True:
 
     while True:
-
+        rgb_signal = []
+        heart_rates = []
         ret, frame = video.read()
         frame = np.full(frame.shape, False, dtype=np.uint8)
         cv2.putText(frame, "Welcome", (260, 200), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
@@ -217,7 +226,7 @@ while True:
                 if(len(heart_rates) > 0):
                     cv2.putText(frame, str(int(heart_rates[-1])), ((previous_bounding_box[0]+(previous_bounding_box[2]//4)), previous_bounding_box[1]), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
                 if FULL_WINDOW:
-                    roi = cv2.resize(roi,(win_x, win_y))
+                    frame = cv2.resize(frame,(win_x, win_y))
                 cv2.imshow('Feel My Heart', frame)
                 away_count = 0 
             else:
@@ -232,7 +241,8 @@ while True:
             frame = np.full(frame.shape, False, dtype=np.uint8)
             # print("frame: ",frame.shape)
             cv2.putText(frame, "Please recenter your face ", (90, 30), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
-            
+            if FULL_WINDOW:
+                frame = cv2.resize(frame,(win_x, win_y))
             # frame = cv2.resize(frame,(win_x, win_y))
             cv2.imshow('Feel My Heart',frame )
             away_count +=1

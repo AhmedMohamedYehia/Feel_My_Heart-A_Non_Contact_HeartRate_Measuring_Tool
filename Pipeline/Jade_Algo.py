@@ -218,22 +218,22 @@ def constructCumlant(Matrix,PWT):
     SinMat = np.matrix(np.eye(m, dtype=np.float64))
     Temp = np.zeros([m, m], dtype =np.float64)
     Xi=Xij = np.zeros(m, dtype=np.float64)
-    Range = np.asarray([0,1,2])
+    end = np.asarray([0,1,2])
     #filling the cumlant matrix
     for i in range(m):
         Xi = PW[:,i]
         Xij = np.multiply(Xi, Xi)
         temp1=np.multiply(Xij, PW).T * PW / float(T)
         temp2=np.dot(SinMat[:,i], SinMat[:,i].T)
-        CumMat[:,Range]=temp1-SinMat-2*temp2
-        Range = Range + m
+        CumMat[:,end]=temp1-SinMat-2*temp2
+        end = end + m
         for j in range(i):
             Xij = np.multiply(Xi, PW[:,j])
             temp1=np.multiply(Xij, PW).T * PW / float(T)
             temp2=SinMat[:,i] * SinMat[:,j].T
             temp3=SinMat[:,j] * SinMat[:,i].T
-            CumMat[:,Range]= np.sqrt(2) *temp1-temp2-temp3
-            Range = Range + m
+            CumMat[:,end]= np.sqrt(2) *temp1-temp2-temp3
+            end = end + m
     return CumMat
 
 def JointDiagonalization(Matrix,CumMat):
@@ -248,7 +248,7 @@ def JointDiagonalization(Matrix,CumMat):
     #rotation matrix
     thres = 1.0e-6 / np.sqrt(T)
     boolen = True
-    c=s=Ondiag=Offdiag=theta=0
+    Ondiag=Offdiag=theta=0
     while boolen:
         boolen = False
         for i in range(m-1):
