@@ -14,8 +14,6 @@ the blood volume in the arterioles grows. A basic RGB video camera can capture
 these changes.
 </p>
 
-<br></br>
-
 <p>
 We are proud to present version one of Feel My Heart. It has been successfully
 implemented and tested. It consists of three main modules that handle face detection, 
