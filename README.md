@@ -34,4 +34,4 @@ anyone exercising
   <li><h2>Heart Rate Estimation</h2> </li>
 </ol> </p>
 
-<p>A demo video for the project: https://youtu.be/LRhmaEh0k7E</p>
+<h1>A demo video for the project: https://youtu.be/LRhmaEh0k7E</h1>
